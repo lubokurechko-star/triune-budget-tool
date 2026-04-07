@@ -492,14 +492,14 @@ def main():
                                          accept_multiple_files=True)
         st.markdown("---")
         st.markdown("### 📊 Features")
-        st.markdown(" 6 professional charts\n Variance analysis\n Password protected")
+        st.markdown(" 6 professional charts,\n Variance analysis,\n and Password protected")
         
-        if st.button("🔓 Logout"):
+        if st.button(" Logout"):
             st.session_state["password_correct"] = False
             st.rerun()
     
     if not uploaded_files:
-        st.info("👆 Upload budget worksheets to get started")
+        st.info(" Upload budget worksheets to get started")
     else:
         st.markdown("### 📊 Analysis Results")
         
