@@ -1,17 +1,3 @@
-"""
-================================================================
-  Triune Entertainment – Budget Analysis Tool (Web Version v2)
-  IT493 | Team 4
-================================================================
-  FIXED:
-  - Proper Budget (left col 7) vs Actual (right col 13) extraction
-  - All 6 professional charts with enhanced quality
-  - Password protection (default: triune2024)
-  - Multiple file upload support (with unique keys)
-  - Smart delta colors (red=bad, green=good)
-================================================================
-"""
-
 import streamlit as st
 import os, io, json, hashlib
 from datetime import datetime
