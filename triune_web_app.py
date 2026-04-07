@@ -474,7 +474,7 @@ def main():
                    target='_blank' 
                    style='background-color: #2E75B6; color: white; padding: 10px 20px; margin: 0 10px; 
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
-                    📢 Marketing Dashboard
+                    📢 Google Ads
                 </a>
                 <a href='https://airtable.com/appDuTE72UfHIFOJT/shrmRPv812yX1gDlZ/tblDl6p4SNVzHLQmZ/viw0wLiFVeOZYvJ6b' 
                    target='_blank' 
@@ -492,7 +492,7 @@ def main():
                                          accept_multiple_files=True)
         st.markdown("---")
         st.markdown("### 📊 Features")
-        st.markdown("✅ 6 professional charts\n✅ Variance analysis\n✅ Multi-file support\n✅ Password protected")
+        st.markdown("✅ 6 professional charts\n✅ Variance analysis\n✅ Password protected")
         
         if st.button("🔓 Logout"):
             st.session_state["password_correct"] = False
