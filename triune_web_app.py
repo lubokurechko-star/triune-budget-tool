@@ -66,19 +66,19 @@ def check_password():
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("### 🔒 Secure Login")
+    st.markdown("###  Secure Login")
     st.markdown("Please enter your password to access the Budget Analysis Tool.")
     
     password = st.text_input("Password", type="password", key="password_input")
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("🔓 Login", use_container_width=True):
+        if st.button(" Login", use_container_width=True):
             if password == "triune2024":
                 st.session_state["password_correct"] = True
                 st.rerun()
             else:
-                st.error("❌ Incorrect password. Please try again.")
+                st.error(" Incorrect password. Please try again.")
     
     st.markdown("---")
     st.info("Contact Team 4 for login credentials.")
@@ -509,7 +509,7 @@ def main():
                 data, error = extract_budget_data(uploaded_file)
                 
                 if error:
-                    st.error(f"❌ Error: {error}")
+                    st.error(f" Error: {error}")
                     continue
                 
                 st.markdown(f"## {data['show_name']} ({data['show_date']})")
