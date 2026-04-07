@@ -476,7 +476,7 @@ def main():
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
                     📢 Google Ads
                 </a>
-                <a href='https://airtable.com/appDuTE72UfHIFOJT/shrmRPv812yX1gDlZ/tblDl6p4SNVzHLQmZ/viw0wLiFVeOZYvJ6b' 
+                <a href='https://nam11.safelinks.protection.outlook.com/?url=https%3A%2F%2Fairtable.com%2Finvite%2Fl%3FinviteId%3Dinv76YrZoHYaov1EW%26inviteToken%3Dbd8a694d783dfda21fc41eaff2a4770cb4800b5b8d9ea5ffc3e127a7eb3ad213%26utm_medium%3Demail%26utm_source%3Dproduct_team%26utm_content%3Dtransactional-alerts&data=05%7C02%7Clkurechk%40gmu.edu%7C9e1a0e5c15fd4598d13308de94b465da%7C9e857255df574c47a0c00546460380cb%7C0%7C0%7C639111699678089993%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ATDLeWIDyrsGHhFdVA0AOix6ucyfJ6IO1D5kgO%2FoK18%3D&reserved=0' 
                    target='_blank' 
                    style='background-color: #70AD47; color: white; padding: 10px 20px; margin: 0 10px; 
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
