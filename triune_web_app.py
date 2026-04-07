@@ -62,7 +62,6 @@ def check_password():
         <div style='background-color: #1F3864; padding: 30px; border-radius: 10px; margin-bottom: 20px; text-align: center;'>
             <h1 style='color: white; margin: 0;'>🎭 Triune Entertainment</h1>
             <h2 style='color: #D6E4F0; margin: 10px 0;'>Budget Analysis Tool</h2>
-            <p style='color: #2E75B6; margin: 0; font-family: monospace;'>IT493 | Team 4</p>
         </div>
     """, unsafe_allow_html=True)
     
