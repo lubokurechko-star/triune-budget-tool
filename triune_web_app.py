@@ -81,7 +81,7 @@ def check_password():
                 st.error("❌ Incorrect password. Please try again.")
     
     st.markdown("---")
-    st.info("Contact your IT administrator for login credentials.")
+    st.info("Contact Team 4 for login credentials.")
     
     return False
 
