@@ -142,6 +142,49 @@ def extract_budget_data(uploaded_file):
     expense_variance = actual_expenses - budget_expenses
     net_variance = actual_net - budget_net
     
+    # Extract detailed expense categories
+    expense_categories = []
+    in_expense_section = False
+    
+    for idx in range(len(df)):
+        row_text = str(df.iloc[idx, 1]) if pd.notna(df.iloc[idx, 1]) else ""
+        
+        # Start tracking when we hit 5000 section
+        if "5000 Direct Production Costs" in row_text:
+            in_expense_section = True
+            continue
+        
+        # Stop when we hit the total
+        if "Total 5000" in row_text:
+            break
+        
+        # Extract category details
+        if in_expense_section:
+            cat_name = str(df.iloc[idx, 2]) if pd.notna(df.iloc[idx, 2]) else ""
+            if cat_name and cat_name.strip() and cat_name != 'nan':
+                cat_budget = pd.to_numeric(df.iloc[idx, 7], errors='coerce') or 0
+                cat_actual = pd.to_numeric(df.iloc[idx, 13], errors='coerce') or 0
+                cat_variance = cat_actual - cat_budget
+                cat_variance_pct = (cat_variance / cat_budget * 100) if cat_budget > 0 else 0
+                
+                # Clean up category name (remove code number)
+                if ' ' in cat_name:
+                    parts = cat_name.split(' ', 1)
+                    if len(parts) > 1:
+                        cat_name_clean = parts[1].strip()
+                    else:
+                        cat_name_clean = cat_name
+                else:
+                    cat_name_clean = cat_name
+                
+                expense_categories.append({
+                    'name': cat_name_clean,
+                    'budget': cat_budget,
+                    'actual': cat_actual,
+                    'variance': cat_variance,
+                    'variance_pct': cat_variance_pct
+                })
+    
     return {
         'filename': uploaded_file.name,
         'show_name': show_name,
@@ -159,6 +202,7 @@ def extract_budget_data(uploaded_file):
         'net_variance': net_variance,
         'revenue_variance_pct': (revenue_variance / budget_revenue * 100) if budget_revenue > 0 else 0,
         'expense_variance_pct': (expense_variance / budget_expenses * 100) if budget_expenses > 0 else 0,
+        'expense_categories': expense_categories
     }, None
  
  
@@ -381,6 +425,83 @@ def create_chart_6_bar(data):
     return fig
  
  
+def create_chart_7_category_breakdown(data):
+    """Chart 7: Detailed Category Breakdown"""
+    if not data.get('expense_categories'):
+        # Return empty figure if no categories
+        fig, ax = plt.subplots(figsize=(14, 8))
+        ax.text(0.5, 0.5, 'No category data available', ha='center', va='center')
+        return fig
+    
+    categories = data['expense_categories']
+    
+    # Sort by variance (biggest overruns first)
+    sorted_cats = sorted(categories, key=lambda x: x['variance'], reverse=True)
+    
+    # Take top 10 categories
+    top_cats = sorted_cats[:10]
+    
+    fig, ax = plt.subplots(figsize=(16, 10))
+    fig.patch.set_facecolor('#F0F5FB')
+    ax.set_facecolor('#FFFFFF')
+    
+    names = [cat['name'][:40] for cat in top_cats]  # Truncate long names
+    budgets = [cat['budget'] for cat in top_cats]
+    actuals = [cat['actual'] for cat in top_cats]
+    variances = [cat['variance'] for cat in top_cats]
+    
+    y_pos = range(len(names))
+    height = 0.35
+    
+    # Create horizontal bars
+    bars1 = ax.barh([i-height/2 for i in y_pos], budgets, height, 
+                    label='Budget', color=TEAL, alpha=0.9, edgecolor='white', linewidth=2)
+    bars2 = ax.barh([i+height/2 for i in y_pos], actuals, height,
+                    label='Actual', color=PURPLE, alpha=0.9, edgecolor='white', linewidth=2)
+    
+    # Add value labels
+    for bars in [bars1, bars2]:
+        for bar in bars:
+            width = bar.get_width()
+            if width > 0:
+                ax.annotate(f'${width:,.0f}',
+                           xy=(width, bar.get_y() + bar.get_height()/2),
+                           xytext=(5, 0), textcoords='offset points',
+                           va='center', fontsize=9, fontweight='bold')
+    
+    # Add variance indicators
+    for i, (cat, var) in enumerate(zip(top_cats, variances)):
+        if cat['budget'] > 0:
+            var_pct = cat['variance_pct']
+            color = RED if var > 0 else GREEN
+            symbol = "▲" if var > 0 else "▼"
+            
+            # Position at the end of the longer bar
+            x_pos = max(cat['budget'], cat['actual']) + (max(budgets) * 0.05)
+            
+            ax.annotate(f'{symbol} ${abs(var):,.0f} ({abs(var_pct):.1f}%)',
+                       xy=(x_pos, i),
+                       xytext=(0, 0), textcoords='offset points',
+                       va='center', fontsize=10, fontweight='bold', color=color,
+                       bbox=dict(boxstyle='round,pad=0.4', facecolor='white',
+                                edgecolor=color, linewidth=2))
+    
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(names, fontsize=10)
+    ax.set_xlabel('Amount ($)', fontsize=13, fontweight='bold')
+    ax.set_title('Top 10 Expense Categories: Budget vs Actual\n(Red ▲ = Over Budget | Green ▼ = Under Budget)', 
+                 fontsize=16, fontweight='bold', color=NAVY, pad=20)
+    ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f'${v:,.0f}'))
+    ax.legend(fontsize=12, loc='lower right')
+    ax.grid(True, alpha=0.3, axis='x')
+    
+    # Invert y-axis so biggest variance is on top
+    ax.invert_yaxis()
+    
+    plt.tight_layout()
+    return fig
+ 
+ 
 # ═══════════════════════════════════════════════════
 #  EXCEL REPORT
 # ═══════════════════════════════════════════════════
@@ -438,7 +559,7 @@ def generate_excel_report(data, charts_dict):
     
     # Add each chart to separate sheets
     chart_names = ['Budget_vs_Actual', 'Variance_Analysis', 'Pie_Charts', 
-                   'Scatter_Plot', 'Line_Graph', 'Bar_Graph']
+                   'Scatter_Plot', 'Line_Graph', 'Bar_Graph', 'Category_Breakdown']
     
     for chart_name, fig in zip(chart_names, charts_dict.values()):
         # Create new sheet
@@ -560,11 +681,53 @@ def main():
                     st.metric("Actual Margin", actual_margin_str,
                              delta=margin_delta_str, delta_color=delta_color)
                 
-                st.markdown("### 📈 All 6 Professional Charts")
+                # Category-level insights
+                if data.get('expense_categories'):
+                    st.markdown("### 🎯 Category Performance Insights")
+                    
+                    cats = data['expense_categories']
+                    
+                    # Sort by variance
+                    overruns = sorted([c for c in cats if c['variance'] > 0], 
+                                    key=lambda x: x['variance'], reverse=True)[:5]
+                    savings = sorted([c for c in cats if c['variance'] < 0], 
+                                   key=lambda x: x['variance'])[:5]
+                    
+                    col_over, col_save = st.columns(2)
+                    
+                    with col_over:
+                        st.markdown("#### 🔴 Top 5 Budget Overruns")
+                        if overruns:
+                            for i, cat in enumerate(overruns, 1):
+                                st.markdown(f"""
+                                **{i}. {cat['name']}**  
+                                Budget: ${cat['budget']:,.2f} | Actual: ${cat['actual']:,.2f}  
+                                <span style='color: #C00000; font-weight: bold;'>
+                                ▲ ${cat['variance']:,.2f} (+{cat['variance_pct']:.1f}%)
+                                </span>
+                                """, unsafe_allow_html=True)
+                        else:
+                            st.success("✅ No categories over budget!")
+                    
+                    with col_save:
+                        st.markdown("#### ✅ Top 5 Budget Savings")
+                        if savings:
+                            for i, cat in enumerate(savings, 1):
+                                st.markdown(f"""
+                                **{i}. {cat['name']}**  
+                                Budget: ${cat['budget']:,.2f} | Actual: ${cat['actual']:,.2f}  
+                                <span style='color: #70AD47; font-weight: bold;'>
+                                ▼ ${abs(cat['variance']):,.2f} (-{abs(cat['variance_pct']):.1f}%)
+                                </span>
+                                """, unsafe_allow_html=True)
+                        else:
+                            st.info("No categories under budget")
                 
-                tab1,tab2,tab3,tab4,tab5,tab6 = st.tabs([
+                st.markdown("### 📈 All 7 Professional Charts")
+                
+                tab1,tab2,tab3,tab4,tab5,tab6,tab7 = st.tabs([
                     "Budget vs Actual", "Variance", "Pie Charts", 
-                    "Scatter Plot", "Line Graph", "Bar Graph"
+                    "Scatter Plot", "Line Graph", "Bar Graph", "Category Breakdown"
                 ])
                 
                 # Create all charts and store them
@@ -574,6 +737,7 @@ def main():
                 fig4 = create_chart_4_scatter(data)
                 fig5 = create_chart_5_line(data)
                 fig6 = create_chart_6_bar(data)
+                fig7 = create_chart_7_category_breakdown(data)
                 
                 charts_dict = {
                     'budget_vs_actual': fig1,
@@ -581,7 +745,8 @@ def main():
                     'pie': fig3,
                     'scatter': fig4,
                     'line': fig5,
-                    'bar': fig6
+                    'bar': fig6,
+                    'category_breakdown': fig7
                 }
                 
                 with tab1:
@@ -596,6 +761,8 @@ def main():
                     st.pyplot(fig5)
                 with tab6:
                     st.pyplot(fig6)
+                with tab7:
+                    st.pyplot(fig7)
                 
                 # Close all figures after display
                 for fig in charts_dict.values():
@@ -615,7 +782,7 @@ def main():
                 # Generate Excel with charts
                 excel_data = generate_excel_report(data, charts_dict)
                 st.download_button(
-                    label=f"📥 Download {data['show_name']} Excel Report (with all 6 charts)",
+                    label=f"📥 Download {data['show_name']} Excel Report (with all 7 charts)",
                     data=excel_data,
                     file_name=f"{custom_filename}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
