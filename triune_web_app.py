@@ -1,41 +1,27 @@
-"""
-================================================================
-  Triune Entertainment – Budget Analysis Tool (Web Version v2)
-  IT493 | Team 4
-================================================================
-  FIXED:
-  - Proper Budget (left col 7) vs Actual (right col 13) extraction
-  - All 6 professional charts with enhanced quality
-  - Password protection (default: triune2024)
-  - Multiple file upload support (with unique keys)
-  - Smart delta colors (red=bad, green=good)
-================================================================
-"""
-
 import streamlit as st
 import os, io, json, hashlib
 from datetime import datetime
 import pandas as pd
-
+ 
 # Configure matplotlib BEFORE importing pyplot
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-
+ 
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font, Alignment
 from openpyxl.utils import get_column_letter
 from openpyxl.drawing.image import Image as XLImage
-
+ 
 # ── Brand Colors ──────────────────────────────────────────────
 NAVY="#1F3864"; TEAL="#2E75B6"; LIGHT="#D6E4F0"; WHITE="#FFFFFF"
 GREEN="#70AD47"; RED="#C00000"; DARK="#152848"; PURPLE="#9B59B6"
 GOLD="#FFF2CC"
-
+ 
 OX_NAVY="1F3864"; OX_TEAL="2E75B6"; OX_LIGHT="D6E4F0"
 OX_WHITE="FFFFFF"; OX_GOLD="FFF2CC"
-
+ 
 # ── Page Configuration ────────────────────────────────────────
 st.set_page_config(
     page_title="Triune Budget Analysis Tool",
@@ -43,7 +29,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
+ 
 # ── Custom CSS ─────────────────────────────────────────────────
 st.markdown("""
     <style>
@@ -57,12 +43,12 @@ st.markdown("""
     h2 {color: #2E75B6; font-family: Georgia, serif;}
     </style>
     """, unsafe_allow_html=True)
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════
 #  PASSWORD PROTECTION
 # ═══════════════════════════════════════════════════
-
+ 
 def check_password():
     """Returns True if user entered correct password."""
     
@@ -98,12 +84,12 @@ def check_password():
     st.info("Contact your IT administrator for login credentials.")
     
     return False
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════
 #  DATA EXTRACTION
 # ═══════════════════════════════════════════════════
-
+ 
 def extract_budget_data(uploaded_file):
     """Extract Budget (LEFT col 7) and Actual (RIGHT col 13) data."""
     try:
@@ -172,12 +158,12 @@ def extract_budget_data(uploaded_file):
         'revenue_variance_pct': (revenue_variance / budget_revenue * 100) if budget_revenue > 0 else 0,
         'expense_variance_pct': (expense_variance / budget_expenses * 100) if budget_expenses > 0 else 0,
     }, None
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════
 #  CHART FUNCTIONS (6 total)
 # ═══════════════════════════════════════════════════
-
+ 
 def create_chart_1_budget_vs_actual(data):
     """Chart 1: Budget vs Actual - 3 comparisons"""
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
@@ -231,7 +217,7 @@ def create_chart_1_budget_vs_actual(data):
     
     plt.tight_layout()
     return fig
-
+ 
 def create_chart_2_variance(data):
     """Chart 2: Variance Analysis"""
     fig, ax = plt.subplots(figsize=(12, 7))
@@ -258,7 +244,7 @@ def create_chart_2_variance(data):
     
     plt.tight_layout()
     return fig
-
+ 
 def create_chart_3_pie(data):
     """Chart 3: Pie Charts"""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
@@ -280,7 +266,7 @@ def create_chart_3_pie(data):
     
     plt.tight_layout()
     return fig
-
+ 
 def create_chart_4_scatter(data):
     """Chart 4: Scatter Plot"""
     fig, ax = plt.subplots(figsize=(11, 8))
@@ -310,7 +296,7 @@ def create_chart_4_scatter(data):
     
     plt.tight_layout()
     return fig
-
+ 
 def create_chart_5_line(data):
     """Chart 5: Line Graph"""
     fig, ax = plt.subplots(figsize=(13, 7))
@@ -343,7 +329,7 @@ def create_chart_5_line(data):
     
     plt.tight_layout()
     return fig
-
+ 
 def create_chart_6_bar(data):
     """Chart 6: Comprehensive Bar Graph"""
     fig, ax = plt.subplots(figsize=(15, 8))
@@ -391,12 +377,12 @@ def create_chart_6_bar(data):
     
     plt.tight_layout()
     return fig
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════
 #  EXCEL REPORT
 # ═══════════════════════════════════════════════════
-
+ 
 def generate_excel_report(data, charts_dict):
     """Generate Excel report with embedded charts."""
     wb = Workbook()
@@ -469,12 +455,12 @@ def generate_excel_report(data, charts_dict):
     wb.save(buf)
     buf.seek(0)
     return buf.getvalue()
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════
 #  MAIN APP
 # ═══════════════════════════════════════════════════
-
+ 
 def main():
     if not check_password():
         return
@@ -631,8 +617,9 @@ def main():
                     data=excel_data,
                     file_name=f"{custom_filename}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True
+                    use_container_width=True,
+                    key=f"download_btn_{idx}_{uploaded_file.name}"
                 )
-
+ 
 if __name__ == "__main__":
     main()
