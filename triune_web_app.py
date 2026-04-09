@@ -266,7 +266,7 @@ def create_chart_1_budget_vs_actual(data):
  
 def create_chart_2_variance(data):
     """Chart 2: Variance Analysis"""
-    fig, ax = plt.subplots(figsize=(12, 7))
+    fig, ax = plt.subplots(figsize=(14, 9))
     fig.patch.set_facecolor('#F0F5FB')
     ax.set_facecolor('#FFFFFF')
     
@@ -274,21 +274,29 @@ def create_chart_2_variance(data):
     variances = [data['revenue_variance'], data['expense_variance'], data['net_variance']]
     colors = [GREEN if v>=0 else RED for v in variances]
     
-    bars = ax.bar(categories, variances, color=colors, alpha=0.9, width=0.5, linewidth=2, edgecolor='white')
-    ax.set_title('Variance Analysis (Actual - Budget)', fontsize=16, fontweight='bold', color=NAVY, pad=20)
+    bars = ax.bar(categories, variances, color=colors, alpha=0.9, width=0.6, linewidth=2, edgecolor='white')
+    ax.set_title('Variance Analysis (Actual - Budget)', fontsize=18, fontweight='bold', color=NAVY, pad=25)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f'${v:,.0f}'))
     ax.axhline(y=0, color='black', linewidth=2)
-    ax.grid(axis='y', alpha=0.3, linestyle='--')
+    ax.grid(True, alpha=0.3, linestyle='--', linewidth=0.8)
+    ax.set_ylabel('Variance Amount ($)', fontsize=14, fontweight='bold', labelpad=10)
+    ax.set_xlabel('Category', fontsize=14, fontweight='bold', labelpad=10)
     
     for bar, val in zip(bars, variances):
         h = bar.get_height()
         pct = (val / data['budget_revenue'] * 100) if data['budget_revenue'] > 0 else 0
+        # Position label further from bar to prevent overlap
+        y_offset = 15 if h >= 0 else -45
         ax.annotate(f'${abs(h):,.0f}\n({abs(pct):.1f}%)',
                    xy=(bar.get_x()+bar.get_width()/2, h),
-                   xytext=(0, 10 if h>=0 else -35), textcoords='offset points',
-                   ha='center', fontsize=11, fontweight='bold')
+                   xytext=(0, y_offset), textcoords='offset points',
+                   ha='center', fontsize=13, fontweight='bold')
     
-    plt.tight_layout()
+    # Add more y-axis padding
+    y_max = max(abs(min(variances)), abs(max(variances)))
+    ax.set_ylim(-y_max * 1.3, y_max * 1.3)
+    
+    plt.tight_layout(pad=2.0)
     return fig
  
 def create_chart_3_pie(data):
@@ -345,7 +353,7 @@ def create_chart_4_scatter(data):
  
 def create_chart_5_line(data):
     """Chart 5: Line Graph"""
-    fig, ax = plt.subplots(figsize=(13, 7))
+    fig, ax = plt.subplots(figsize=(15, 9))
     fig.patch.set_facecolor('#F0F5FB')
     ax.set_facecolor('#FFFFFF')
     
@@ -354,26 +362,38 @@ def create_chart_5_line(data):
     budget = [data['budget_revenue'], data['budget_expenses'], data['budget_net']]
     actual = [data['actual_revenue'], data['actual_expenses'], data['actual_net']]
     
-    ax.plot(x_pos, budget, marker='o', markersize=12, linewidth=3, color=TEAL,
-            label='Budget', markeredgecolor='white', markeredgewidth=2)
-    ax.plot(x_pos, actual, marker='s', markersize=12, linewidth=3, color=PURPLE,
-            label='Actual', markeredgecolor='white', markeredgewidth=2, linestyle='--')
+    ax.plot(x_pos, budget, marker='o', markersize=14, linewidth=4, color=TEAL,
+            label='Budget', markeredgecolor='white', markeredgewidth=3)
+    ax.plot(x_pos, actual, marker='s', markersize=14, linewidth=4, color=PURPLE,
+            label='Actual', markeredgecolor='white', markeredgewidth=3, linestyle='--')
     
     for i, (b,a) in enumerate(zip(budget, actual)):
-        ax.annotate(f'${b:,.0f}', (i,b), xytext=(0,10), textcoords='offset points',
-                   ha='center', fontsize=9, fontweight='bold', color=TEAL)
-        ax.annotate(f'${a:,.0f}', (i,a), xytext=(0,-18), textcoords='offset points',
-                   ha='center', fontsize=9, fontweight='bold', color=PURPLE)
+        # Budget labels - position higher
+        ax.annotate(f'${b:,.0f}', (i,b), xytext=(0,18), textcoords='offset points',
+                   ha='center', fontsize=11, fontweight='bold', color=TEAL,
+                   bbox=dict(boxstyle='round,pad=0.4', facecolor='white', 
+                            edgecolor=TEAL, linewidth=2))
+        # Actual labels - position lower
+        ax.annotate(f'${a:,.0f}', (i,a), xytext=(0,-25), textcoords='offset points',
+                   ha='center', fontsize=11, fontweight='bold', color=PURPLE,
+                   bbox=dict(boxstyle='round,pad=0.4', facecolor='white', 
+                            edgecolor=PURPLE, linewidth=2))
     
     ax.set_xticks(x_pos)
-    ax.set_xticklabels(categories, fontsize=11, fontweight='bold')
-    ax.set_ylabel('Amount ($)', fontsize=12, fontweight='bold')
-    ax.set_title('Trend Analysis', fontsize=15, fontweight='bold', color=NAVY, pad=15)
+    ax.set_xticklabels(categories, fontsize=13, fontweight='bold')
+    ax.set_ylabel('Amount ($)', fontsize=14, fontweight='bold', labelpad=10)
+    ax.set_title('Trend Analysis', fontsize=18, fontweight='bold', color=NAVY, pad=20)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f'${v:,.0f}'))
-    ax.legend(fontsize=11)
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.legend(fontsize=13, frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3, axis='y', linewidth=0.8)
     
-    plt.tight_layout()
+    # Add more y-axis padding for labels
+    y_min = min(min(budget), min(actual))
+    y_max = max(max(budget), max(actual))
+    y_range = y_max - y_min
+    ax.set_ylim(y_min - y_range*0.15, y_max + y_range*0.15)
+    
+    plt.tight_layout(pad=2.0)
     return fig
  
 def create_chart_6_bar(data):
@@ -441,64 +461,69 @@ def create_chart_7_category_breakdown(data):
     # Take top 10 categories
     top_cats = sorted_cats[:10]
     
-    fig, ax = plt.subplots(figsize=(16, 10))
+    # Increase figure size for better spacing
+    fig, ax = plt.subplots(figsize=(20, 12))
     fig.patch.set_facecolor('#F0F5FB')
     ax.set_facecolor('#FFFFFF')
     
-    names = [cat['name'][:40] for cat in top_cats]  # Truncate long names
+    names = [cat['name'][:50] for cat in top_cats]  # Allow longer names
     budgets = [cat['budget'] for cat in top_cats]
     actuals = [cat['actual'] for cat in top_cats]
     variances = [cat['variance'] for cat in top_cats]
     
     y_pos = range(len(names))
-    height = 0.35
+    height = 0.4  # Slightly thinner bars for more spacing
     
-    # Create horizontal bars
+    # Create horizontal bars with more spacing
     bars1 = ax.barh([i-height/2 for i in y_pos], budgets, height, 
                     label='Budget', color=TEAL, alpha=0.9, edgecolor='white', linewidth=2)
     bars2 = ax.barh([i+height/2 for i in y_pos], actuals, height,
                     label='Actual', color=PURPLE, alpha=0.9, edgecolor='white', linewidth=2)
     
-    # Add value labels
+    # Add value labels with better positioning
     for bars in [bars1, bars2]:
         for bar in bars:
             width = bar.get_width()
             if width > 0:
                 ax.annotate(f'${width:,.0f}',
                            xy=(width, bar.get_y() + bar.get_height()/2),
-                           xytext=(5, 0), textcoords='offset points',
-                           va='center', fontsize=9, fontweight='bold')
+                           xytext=(8, 0), textcoords='offset points',
+                           va='center', fontsize=11, fontweight='bold')
     
-    # Add variance indicators
+    # Add variance indicators with better spacing
+    max_val = max(max(budgets), max(actuals))
     for i, (cat, var) in enumerate(zip(top_cats, variances)):
         if cat['budget'] > 0:
             var_pct = cat['variance_pct']
             color = RED if var > 0 else GREEN
             symbol = "▲" if var > 0 else "▼"
             
-            # Position at the end of the longer bar
-            x_pos = max(cat['budget'], cat['actual']) + (max(budgets) * 0.05)
+            # Position variance label further to the right
+            x_pos = max(cat['budget'], cat['actual']) + (max_val * 0.15)
             
             ax.annotate(f'{symbol} ${abs(var):,.0f} ({abs(var_pct):.1f}%)',
                        xy=(x_pos, i),
                        xytext=(0, 0), textcoords='offset points',
-                       va='center', fontsize=10, fontweight='bold', color=color,
-                       bbox=dict(boxstyle='round,pad=0.4', facecolor='white',
-                                edgecolor=color, linewidth=2))
+                       va='center', fontsize=12, fontweight='bold', color=color,
+                       bbox=dict(boxstyle='round,pad=0.5', facecolor='white',
+                                edgecolor=color, linewidth=2.5))
     
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(names, fontsize=10)
-    ax.set_xlabel('Amount ($)', fontsize=13, fontweight='bold')
+    ax.set_yticklabels(names, fontsize=11)
+    ax.set_xlabel('Amount ($)', fontsize=14, fontweight='bold', labelpad=10)
     ax.set_title('Top 10 Expense Categories: Budget vs Actual\n(Red ▲ = Over Budget | Green ▼ = Under Budget)', 
-                 fontsize=16, fontweight='bold', color=NAVY, pad=20)
+                 fontsize=18, fontweight='bold', color=NAVY, pad=25)
     ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f'${v:,.0f}'))
-    ax.legend(fontsize=12, loc='lower right')
-    ax.grid(True, alpha=0.3, axis='x')
+    ax.legend(fontsize=13, loc='lower right', frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3, axis='x', linewidth=0.8)
+    
+    # Add more padding to prevent label cutoff
+    ax.margins(x=0.25)
     
     # Invert y-axis so biggest variance is on top
     ax.invert_yaxis()
     
-    plt.tight_layout()
+    plt.tight_layout(pad=2.0)
     return fig
  
  
