@@ -640,7 +640,7 @@ def main():
                                          accept_multiple_files=True)
         st.markdown("---")
         st.markdown("### 📊 Features")
-        st.markdown(" 6 professional charts\n, Variance analysis\n, Multi-file support\n,  and Password protected")
+        st.markdown(" 7 professional charts\n, Variance analysis\n, Multi-file support\n,  and Password protected")
         
         if st.button(" Logout"):
             st.session_state["password_correct"] = False
