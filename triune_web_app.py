@@ -1,3 +1,17 @@
+"""
+================================================================
+  Triune Entertainment – Budget Analysis Tool (Web Version v2)
+  IT493 | Team 4
+================================================================
+  FIXED:
+  - Proper Budget (left col 7) vs Actual (right col 13) extraction
+  - All 6 professional charts with enhanced quality
+  - Password protection (default: triune2024)
+  - Multiple file upload support (with unique keys)
+  - Smart delta colors (red=bad, green=good)
+================================================================
+"""
+
 import streamlit as st
 import os, io, json, hashlib
 from datetime import datetime
@@ -62,25 +76,26 @@ def check_password():
         <div style='background-color: #1F3864; padding: 30px; border-radius: 10px; margin-bottom: 20px; text-align: center;'>
             <h1 style='color: white; margin: 0;'>🎭 Triune Entertainment</h1>
             <h2 style='color: #D6E4F0; margin: 10px 0;'>Budget Analysis Tool</h2>
+            <p style='color: #2E75B6; margin: 0; font-family: monospace;'>IT493 | Team 4</p>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("###  Secure Login")
+    st.markdown("### 🔒 Secure Login")
     st.markdown("Please enter your password to access the Budget Analysis Tool.")
     
     password = st.text_input("Password", type="password", key="password_input")
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button(" Login", use_container_width=True):
+        if st.button("🔓 Login", use_container_width=True):
             if password == "triune2024":
                 st.session_state["password_correct"] = True
                 st.rerun()
             else:
-                st.error(" Incorrect password. Please try again.")
+                st.error("❌ Incorrect password. Please try again.")
     
     st.markdown("---")
-    st.info("Contact Team 4 for login credentials.")
+    st.info("Contact your IT administrator for login credentials.")
     
     return False
 
@@ -473,13 +488,13 @@ def main():
                    target='_blank' 
                    style='background-color: #2E75B6; color: white; padding: 10px 20px; margin: 0 10px; 
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
-                     Google Ads
+                    📢 Marketing Dashboard
                 </a>
-                <a href='https://nam11.safelinks.protection.outlook.com/?url=https%3A%2F%2Fairtable.com%2Finvite%2Fl%3FinviteId%3Dinv76YrZoHYaov1EW%26inviteToken%3Dbd8a694d783dfda21fc41eaff2a4770cb4800b5b8d9ea5ffc3e127a7eb3ad213%26utm_medium%3Demail%26utm_source%3Dproduct_team%26utm_content%3Dtransactional-alerts&data=05%7C02%7Clkurechk%40gmu.edu%7C9e1a0e5c15fd4598d13308de94b465da%7C9e857255df574c47a0c00546460380cb%7C0%7C0%7C639111699678089993%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ATDLeWIDyrsGHhFdVA0AOix6ucyfJ6IO1D5kgO%2FoK18%3D&reserved=0' 
+                <a href='https://airtable.com/appDuTE72UfHIFOJT/shrmRPv812yX1gDlZ/tblDl6p4SNVzHLQmZ/viw0wLiFVeOZYvJ6b' 
                    target='_blank' 
                    style='background-color: #70AD47; color: white; padding: 10px 20px; margin: 0 10px; 
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
-                     Talent CRM
+                    👥 Talent CRM
                 </a>
             </div>
         </div>
@@ -491,14 +506,14 @@ def main():
                                          accept_multiple_files=True)
         st.markdown("---")
         st.markdown("### 📊 Features")
-        st.markdown(" 6 professional charts,\n Variance analysis,\n and Password protected")
+        st.markdown("✅ 6 professional charts\n✅ Variance analysis\n✅ Multi-file support\n✅ Password protected")
         
-        if st.button(" Logout"):
+        if st.button("🔓 Logout"):
             st.session_state["password_correct"] = False
             st.rerun()
     
     if not uploaded_files:
-        st.info(" Upload budget worksheets to get started")
+        st.info("👆 Upload budget worksheets to get started")
     else:
         st.markdown("### 📊 Analysis Results")
         
@@ -508,7 +523,7 @@ def main():
                 data, error = extract_budget_data(uploaded_file)
                 
                 if error:
-                    st.error(f" Error: {error}")
+                    st.error(f"❌ Error: {error}")
                     continue
                 
                 st.markdown(f"## {data['show_name']} ({data['show_date']})")
@@ -600,12 +615,13 @@ def main():
                 
                 st.markdown("### 💾 Download Report")
                 
-                # Custom filename input
+                # Custom filename input with unique key
                 default_filename = f"{data['show_name']}_{data['show_date']}_analysis"
                 custom_filename = st.text_input(
                     "Report filename (without .xlsx extension):",
                     value=default_filename,
-                    help="Enter a custom name for your report or use the default"
+                    help="Enter a custom name for your report or use the default",
+                    key=f"filename_input_{idx}_{uploaded_file.name}"
                 )
                 
                 # Generate Excel with charts
