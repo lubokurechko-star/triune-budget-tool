@@ -97,21 +97,23 @@ def extract_budget_data(uploaded_file):
     except Exception as e:
         return None, f"Cannot read file: {e}"
     
-    # Extract show name
+    # Extract show name from row 2, column 2
     show_name = "Unknown Show"
     show_date = ""
     
-    for col in range(df.shape[1]):
-        val = df.iloc[1, col]
-        if pd.notna(val) and isinstance(val, str) and len(val) > 5:
-            show_name = val.strip()
-            if " - " in show_name:
-                parts = show_name.split(" - ")
-                show_name = parts[0].strip()
-                show_date = parts[1].strip() if len(parts) > 1 else ""
-            if "Director:" in show_name:
-                show_name = show_name.split("Director:")[0].strip()
-            break
+    # Check row 2 for show name
+    if df.shape[0] > 2:
+        for col in range(df.shape[1]):
+            val = df.iloc[2, col]
+            if pd.notna(val) and isinstance(val, str) and len(val) > 5:
+                show_name = val.strip()
+                if " - " in show_name:
+                    parts = show_name.split(" - ")
+                    show_name = parts[0].strip()
+                    show_date = parts[1].strip() if len(parts) > 1 else ""
+                if "Director:" in show_name:
+                    show_name = show_name.split("Director:")[0].strip()
+                break
     
     # Extract revenue: LEFT (col 7) = BUDGET, RIGHT (col 13) = ACTUAL
     budget_revenue = actual_revenue = 0
