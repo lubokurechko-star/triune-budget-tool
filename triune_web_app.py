@@ -66,19 +66,19 @@ def check_password():
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("###  Secure Login")
+    st.markdown("### 🔒 Secure Login")
     st.markdown("Please enter your password to access the Budget Analysis Tool.")
     
     password = st.text_input("Password", type="password", key="password_input")
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button(" Login", use_container_width=True):
+        if st.button("🔓 Login", use_container_width=True):
             if password == "triune2024":
                 st.session_state["password_correct"] = True
                 st.rerun()
             else:
-                st.error(" Incorrect password. Please try again.")
+                st.error("❌ Incorrect password. Please try again.")
     
     st.markdown("---")
     st.info("Contact your IT administrator for login credentials.")
@@ -582,6 +582,98 @@ def generate_excel_report(data, charts_dict):
     for col, width in [('A',15), ('B',18), ('C',18), ('D',18), ('E',15)]:
         ws.column_dimensions[col].width = width
     
+    # Add Top 5 Overruns and Savings sections
+    if data.get('expense_categories'):
+        cats = data['expense_categories']
+        overruns = sorted([c for c in cats if c['variance'] > 0], 
+                         key=lambda x: x['variance'], reverse=True)[:5]
+        savings = sorted([c for c in cats if c['variance'] < 0], 
+                        key=lambda x: x['variance'])[:5]
+        
+        # Top 5 Overruns section
+        current_row = 11
+        ws[f'A{current_row}'] = "TOP 5 BUDGET OVERRUNS"
+        ws[f'A{current_row}'].font = Font(bold=True, size=14, color=OX_NAVY)
+        ws.merge_cells(f'A{current_row}:E{current_row}')
+        
+        current_row += 1
+        ws[f'A{current_row}'] = "Category"
+        ws[f'B{current_row}'] = "Budget"
+        ws[f'C{current_row}'] = "Actual"
+        ws[f'D{current_row}'] = "Variance"
+        ws[f'E{current_row}'] = "Variance %"
+        
+        for col in ['A','B','C','D','E']:
+            ws[f'{col}{current_row}'].fill = PatternFill('solid', fgColor='C00000')  # Red header
+            ws[f'{col}{current_row}'].font = Font(bold=True, color=OX_WHITE)
+            ws[f'{col}{current_row}'].alignment = Alignment(horizontal='center')
+        
+        if overruns:
+            for i, cat in enumerate(overruns, 1):
+                current_row += 1
+                ws[f'A{current_row}'] = f"{i}. {cat['name']}"
+                ws[f'B{current_row}'] = cat['budget']
+                ws[f'C{current_row}'] = cat['actual']
+                ws[f'D{current_row}'] = cat['variance']
+                ws[f'E{current_row}'] = cat['variance_pct']/100
+                
+                for col in ['B','C','D']:
+                    ws[f'{col}{current_row}'].number_format = '$#,##0.00'
+                ws[f'E{current_row}'].number_format = '0.0%'
+                
+                # Alternate row colors
+                if i%2==0:
+                    for col in ['A','B','C','D','E']:
+                        ws[f'{col}{current_row}'].fill = PatternFill('solid', fgColor=OX_LIGHT)
+        else:
+            current_row += 1
+            ws[f'A{current_row}'] = "✓ No categories over budget!"
+            ws.merge_cells(f'A{current_row}:E{current_row}')
+            ws[f'A{current_row}'].font = Font(color='70AD47', bold=True)
+        
+        # Top 5 Savings section
+        current_row += 2
+        ws[f'A{current_row}'] = "TOP 5 BUDGET SAVINGS"
+        ws[f'A{current_row}'].font = Font(bold=True, size=14, color=OX_NAVY)
+        ws.merge_cells(f'A{current_row}:E{current_row}')
+        
+        current_row += 1
+        ws[f'A{current_row}'] = "Category"
+        ws[f'B{current_row}'] = "Budget"
+        ws[f'C{current_row}'] = "Actual"
+        ws[f'D{current_row}'] = "Variance"
+        ws[f'E{current_row}'] = "Variance %"
+        
+        for col in ['A','B','C','D','E']:
+            ws[f'{col}{current_row}'].fill = PatternFill('solid', fgColor='70AD47')  # Green header
+            ws[f'{col}{current_row}'].font = Font(bold=True, color=OX_WHITE)
+            ws[f'{col}{current_row}'].alignment = Alignment(horizontal='center')
+        
+        if savings:
+            for i, cat in enumerate(savings, 1):
+                current_row += 1
+                ws[f'A{current_row}'] = f"{i}. {cat['name']}"
+                ws[f'B{current_row}'] = cat['budget']
+                ws[f'C{current_row}'] = cat['actual']
+                ws[f'D{current_row}'] = cat['variance']
+                ws[f'E{current_row}'] = cat['variance_pct']/100
+                
+                for col in ['B','C','D']:
+                    ws[f'{col}{current_row}'].number_format = '$#,##0.00'
+                ws[f'E{current_row}'].number_format = '0.0%'
+                
+                # Alternate row colors
+                if i%2==0:
+                    for col in ['A','B','C','D','E']:
+                        ws[f'{col}{current_row}'].fill = PatternFill('solid', fgColor=OX_LIGHT)
+        else:
+            current_row += 1
+            ws[f'A{current_row}'] = "No categories under budget"
+            ws.merge_cells(f'A{current_row}:E{current_row}')
+    
+    # Adjust column A width to fit longer category names
+    ws.column_dimensions['A'].width = 50
+    
     # Add each chart to separate sheets
     chart_names = ['Budget_vs_Actual', 'Variance_Analysis', 'Pie_Charts', 
                    'Scatter_Plot', 'Line_Graph', 'Bar_Graph', 'Category_Breakdown']
@@ -622,13 +714,13 @@ def main():
                    target='_blank' 
                    style='background-color: #2E75B6; color: white; padding: 10px 20px; margin: 0 10px; 
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
-                     Google Ads
+                    📢 Marketing Dashboard
                 </a>
                 <a href='https://airtable.com/appDuTE72UfHIFOJT/shrmRPv812yX1gDlZ/tblDl6p4SNVzHLQmZ/viw0wLiFVeOZYvJ6b' 
                    target='_blank' 
                    style='background-color: #70AD47; color: white; padding: 10px 20px; margin: 0 10px; 
                           text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
-                     Talent CRM
+                    👥 Talent CRM
                 </a>
             </div>
         </div>
@@ -640,24 +732,24 @@ def main():
                                          accept_multiple_files=True)
         st.markdown("---")
         st.markdown("### 📊 Features")
-        st.markdown(" 7 professional charts\n, Variance analysis\n, Multi-file support\n,  and Password protected")
+        st.markdown("✅ 6 professional charts\n✅ Variance analysis\n✅ Multi-file support\n✅ Password protected")
         
-        if st.button(" Logout"):
+        if st.button("🔓 Logout"):
             st.session_state["password_correct"] = False
             st.rerun()
     
     if not uploaded_files:
-        st.info(" Upload budget worksheets to get started")
+        st.info("👆 Upload budget worksheets to get started")
     else:
-        st.markdown("###  Analysis Results")
+        st.markdown("### 📊 Analysis Results")
         
         for idx, uploaded_file in enumerate(uploaded_files):
             st.markdown("---")
-            with st.expander(f" {uploaded_file.name}", expanded=True):
+            with st.expander(f"📄 {uploaded_file.name}", expanded=True):
                 data, error = extract_budget_data(uploaded_file)
                 
                 if error:
-                    st.error(f" Error: {error}")
+                    st.error(f"❌ Error: {error}")
                     continue
                 
                 st.markdown(f"## {data['show_name']} ({data['show_date']})")
@@ -708,7 +800,7 @@ def main():
                 
                 # Category-level insights
                 if data.get('expense_categories'):
-                    st.markdown("###  Category Performance Insights")
+                    st.markdown("### 🎯 Category Performance Insights")
                     
                     cats = data['expense_categories']
                     
@@ -721,7 +813,7 @@ def main():
                     col_over, col_save = st.columns(2)
                     
                     with col_over:
-                        st.markdown("####  Top 5 Budget Overruns")
+                        st.markdown("#### 🔴 Top 5 Budget Overruns")
                         if overruns:
                             for i, cat in enumerate(overruns, 1):
                                 st.markdown(f"""
@@ -732,10 +824,10 @@ def main():
                                 </span>
                                 """, unsafe_allow_html=True)
                         else:
-                            st.success(" No categories over budget!")
+                            st.success("✅ No categories over budget!")
                     
                     with col_save:
-                        st.markdown("####  Top 5 Budget Savings")
+                        st.markdown("#### ✅ Top 5 Budget Savings")
                         if savings:
                             for i, cat in enumerate(savings, 1):
                                 st.markdown(f"""
@@ -793,7 +885,7 @@ def main():
                 for fig in charts_dict.values():
                     plt.close(fig)
                 
-                st.markdown("###  Download Report")
+                st.markdown("### 💾 Download Report")
                 
                 # Custom filename input with unique key
                 default_filename = f"{data['show_name']}_{data['show_date']}_analysis"
@@ -807,7 +899,7 @@ def main():
                 # Generate Excel with charts
                 excel_data = generate_excel_report(data, charts_dict)
                 st.download_button(
-                    label=f" Download {data['show_name']} Excel Report (with all 7 charts)",
+                    label=f"📥 Download {data['show_name']} Excel Report (with all 7 charts)",
                     data=excel_data,
                     file_name=f"{custom_filename}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
