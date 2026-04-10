@@ -25,7 +25,6 @@ OX_WHITE="FFFFFF"; OX_GOLD="FFF2CC"
 # ── Page Configuration ────────────────────────────────────────
 st.set_page_config(
     page_title="Triune Budget Analysis Tool",
-    page_icon="🎭",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -730,9 +729,7 @@ def main():
         uploaded_files = st.file_uploader("Choose Excel files", type=['xlsx','xls'],
                                          accept_multiple_files=True)
         st.markdown("---")
-        st.markdown("### 📊 Features")
-        st.markdown(" 7 detailed charts\n, Variance analysis\n, Multi-file support\n, and Password protected")
-        
+     
         if st.button(" Logout"):
             st.session_state["password_correct"] = False
             st.rerun()
