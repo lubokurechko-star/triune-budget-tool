@@ -725,7 +725,7 @@ def main():
     """, unsafe_allow_html=True)
     
     with st.sidebar:
-        st.markdown("###  Upload Budget Worksheets")
+        st.markdown("###  Upload Budget Excel sheets")
         uploaded_files = st.file_uploader("Choose Excel files", type=['xlsx','xls'],
                                          accept_multiple_files=True)
         st.markdown("---")
@@ -796,7 +796,7 @@ def main():
                 
                 # Category-level insights
                 if data.get('expense_categories'):
-                    st.markdown("###  Category Performance Insights")
+                    st.markdown("###  Category Insights")
                     
                     cats = data['expense_categories']
                     
